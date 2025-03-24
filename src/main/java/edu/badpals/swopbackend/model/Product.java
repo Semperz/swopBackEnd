@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -27,9 +28,8 @@ public class Product {
     private String thumbnail;
     private String image;
 
-    @ManyToOne
-    @JoinColumn(name = "category")
-    private Category category;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductCategory> productCategories;
 
     @Column(nullable = false)
     private Integer stock;
@@ -40,7 +40,7 @@ public class Product {
     public Product() {
     }
 
-    public Product(String sku, String name, BigDecimal price, Double weight, String descriptions, String thumbnail, String image, Category category, Integer stock) {
+    public Product(String sku, String name, BigDecimal price, Double weight, String descriptions, String thumbnail, String image, List<ProductCategory> productCategories, Integer stock) {
         this.sku = sku;
         this.name = name;
         this.price = price;
@@ -48,7 +48,7 @@ public class Product {
         this.descriptions = descriptions;
         this.thumbnail = thumbnail;
         this.image = image;
-        this.category = category;
+        this.productCategories = productCategories;
         this.stock = stock;
     }
 
@@ -108,12 +108,12 @@ public class Product {
         this.thumbnail = thumbnail;
     }
 
-    public Category getCategory() {
-        return category;
+    public List<ProductCategory> getCategories() {
+        return productCategories;
     }
 
-    public void setCategory(Category category) {
-        this.category = category;
+    public void setCategories(List<ProductCategory> productCategories) {
+        this.productCategories = productCategories;
     }
 
     public String getImage() {

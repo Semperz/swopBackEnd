@@ -4,6 +4,7 @@ import edu.badpals.swopbackend.model.Category;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class ProductDto {
     private Long id;
@@ -14,14 +15,14 @@ public class ProductDto {
     private String descriptions;
     private String thumbnail;
     private String image;
-    private Category category;
+    private List<Long> categoryIds;
     private Integer stock;
     private LocalDateTime createDate;
 
     public ProductDto() {
     }
 
-    public ProductDto(Long id, String sku, String name, BigDecimal price, Double weight, String descriptions, String thumbnail, String image, Category category, Integer stock, LocalDateTime createDate) {
+    public ProductDto(Long id, String sku, String name, BigDecimal price, Double weight, String descriptions, String thumbnail, String image, List<Long> categoryIds, Integer stock, LocalDateTime createDate) {
         this.id = id;
         this.sku = sku;
         this.name = name;
@@ -30,7 +31,7 @@ public class ProductDto {
         this.descriptions = descriptions;
         this.thumbnail = thumbnail;
         this.image = image;
-        this.category = category;
+        this.categoryIds = categoryIds;
         this.stock = stock;
         this.createDate = createDate;
     }
@@ -99,12 +100,12 @@ public class ProductDto {
         this.image = image;
     }
 
-    public Category getCategory() {
-        return category;
+    public List<Long> getCategories() {
+        return categoryIds;
     }
 
-    public void setCategory(Category category) {
-        this.category = category;
+    public void setCategories(List<Long> categories) {
+        this.categoryIds = categories;
     }
 
     public Integer getStock() {
