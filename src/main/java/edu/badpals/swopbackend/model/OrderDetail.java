@@ -1,16 +1,11 @@
 package edu.badpals.swopbackend.model;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "order_details")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class OrderDetail {
 
     @Id
@@ -33,5 +28,64 @@ public class OrderDetail {
 
     @Column(nullable = false)
     private Integer quantity;
+
+    public OrderDetail() {
+    }
+
+    public OrderDetail(Order order, Product product, BigDecimal price, String sku, Integer quantity) {
+        this.order = order;
+        this.product = product;
+        this.price = price;
+        this.sku = sku;
+        this.quantity = quantity;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
+    public Integer getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
 }
 
