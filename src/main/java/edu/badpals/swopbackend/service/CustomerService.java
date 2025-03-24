@@ -21,6 +21,7 @@ public class CustomerService {
 
     private CustomerDto toDto(Customer customer) {
         return new CustomerDto(
+                customer.getId(),
                 customer.getEmail(),
                 customer.getPassword(),
                 customer.getFullName(),

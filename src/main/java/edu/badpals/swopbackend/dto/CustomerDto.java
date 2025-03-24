@@ -2,6 +2,7 @@ package edu.badpals.swopbackend.dto;
 
 
 public class CustomerDto {
+    private Long id;
     private String email;
     private String password;
     private String fullName;
@@ -14,7 +15,8 @@ public class CustomerDto {
     public CustomerDto() {
     }
 
-    public CustomerDto(String email, String password, String fullName, String billingAddress, String defaultShippingAddress, String country, String phone) {
+    public CustomerDto(Long id, String email, String password, String fullName, String billingAddress, String defaultShippingAddress, String country, String phone) {
+        this.id = id;
         this.email = email;
         this.password = password;
         this.fullName = fullName;
@@ -22,6 +24,14 @@ public class CustomerDto {
         this.defaultShippingAddress = defaultShippingAddress;
         this.country = country;
         this.phone = phone;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getEmail() {
