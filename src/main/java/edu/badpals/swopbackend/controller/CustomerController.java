@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/customers")
-@Tag(name = "Customer Controller", description = "API para gestionar clientes")  // Swagger tag
+@Tag(name = "Clientes", description = "API para gestionar clientes")  // Swagger tag
 public class CustomerController {
 
     private final CustomerService customerService;

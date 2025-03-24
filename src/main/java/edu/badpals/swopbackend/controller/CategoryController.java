@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/categories")
-@Tag(name = "Category Controller", description = "API para gestionar categorías")  // Swagger tag
+@Tag(name = "Categorías", description = "API para gestionar categorías")  // Swagger tag
 public class CategoryController {
 
     private final CategoryService categoryService;
