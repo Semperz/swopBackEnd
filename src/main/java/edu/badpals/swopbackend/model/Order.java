@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "orders")
@@ -17,6 +18,8 @@ public class Order {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<OrderDetail> orderDetails;
     @Column(nullable = false)
     private BigDecimal amount;
 
@@ -43,8 +46,9 @@ public class Order {
     public Order() {
     }
 
-    public Order(Customer customer, BigDecimal amount, String shippingAddress, String orderAddress, String orderEmail, OrderStatus orderStatus, PaymentMethod paymentMethod) {
+    public Order(Customer customer, Set<OrderDetail> orderDetails ,BigDecimal amount, String shippingAddress, String orderAddress, String orderEmail, OrderStatus orderStatus, PaymentMethod paymentMethod) {
         this.customer = customer;
+        this.orderDetails = orderDetails;
         this.amount = amount;
         this.shippingAddress = shippingAddress;
         this.orderAddress = orderAddress;
@@ -67,6 +71,14 @@ public class Order {
 
     public void setCustomer(Customer customer) {
         this.customer = customer;
+    }
+
+    public Set<OrderDetail> getOrderDetails() {
+        return orderDetails;
+    }
+
+    public void setOrderDetails(Set<OrderDetail> orderDetails) {
+        this.orderDetails = orderDetails;
     }
 
     public BigDecimal getAmount() {

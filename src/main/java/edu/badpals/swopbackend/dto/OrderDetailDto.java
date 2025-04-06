@@ -9,8 +9,8 @@ import java.math.BigDecimal;
 
 public class OrderDetailDto {
     private Long id;
-    private Order order;
-    private Product product;
+    private Long order;
+    private Long product;
     private BigDecimal price;
     private String sku;
     private Integer quantity;
@@ -18,7 +18,7 @@ public class OrderDetailDto {
     public OrderDetailDto() {
     }
 
-    public OrderDetailDto(Long id, Order order, Product product, BigDecimal price, String sku, Integer quantity) {
+    public OrderDetailDto(Long id, Long order, Long product, BigDecimal price, String sku, Integer quantity) {
         this.id = id;
         this.order = order;
         this.product = product;
@@ -35,19 +35,19 @@ public class OrderDetailDto {
         this.id = id;
     }
 
-    public Order getOrder() {
+    public Long getOrder() {
         return order;
     }
 
-    public void setOrder(Order order) {
+    public void setOrder(Long order) {
         this.order = order;
     }
 
-    public Product getProduct() {
+    public Long getProduct() {
         return product;
     }
 
-    public void setProduct(Product product) {
+    public void setProduct(Long product) {
         this.product = product;
     }
 

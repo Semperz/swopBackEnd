@@ -1,16 +1,19 @@
 package edu.badpals.swopbackend.dto;
 
 import edu.badpals.swopbackend.model.Customer;
+import edu.badpals.swopbackend.model.OrderDetail;
 import edu.badpals.swopbackend.model.OrderStatus;
 import edu.badpals.swopbackend.model.PaymentMethod;
 
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 public class OrderDto {
     private Long id;
     private Customer customer;
+    private Set<OrderDetailDto> orderDetails;
     private BigDecimal amount;
     private String shippingAddress;
     private String orderAddress;
@@ -22,9 +25,10 @@ public class OrderDto {
     public OrderDto() {
     }
 
-    public OrderDto(Long id, Customer customer, BigDecimal amount, String shippingAddress, String orderAddress, String orderEmail, OrderStatus orderStatus, PaymentMethod paymentMethod, LocalDateTime orderDate) {
+    public OrderDto(Long id, Customer customer, Set<OrderDetailDto> orderDetails,BigDecimal amount, String shippingAddress, String orderAddress, String orderEmail, OrderStatus orderStatus, PaymentMethod paymentMethod, LocalDateTime orderDate) {
         this.id = id;
         this.customer = customer;
+        this.orderDetails = orderDetails;
         this.amount = amount;
         this.shippingAddress = shippingAddress;
         this.orderAddress = orderAddress;
@@ -50,6 +54,12 @@ public class OrderDto {
         this.customer = customer;
     }
 
+    public Set<OrderDetailDto> getOrderDetails() {
+        return orderDetails;
+    }
+    public void setOrderDetails(Set<OrderDetailDto> orderDetails) {
+        this.orderDetails = orderDetails;
+    }
     public BigDecimal getAmount() {
         return amount;
     }
