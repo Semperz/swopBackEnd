@@ -24,19 +24,22 @@ public class InitDbService {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final BidRepository bidRepository;
 
     public InitDbService(CustomerRepository customerRepository,
                          ProductCategoryRepository productCategoryRepository,
                          ProductRepository productRepository,
                          CategoryRepository categoryRepository,
                          OrderRepository orderRepository,
-                         OrderDetailRepository orderDetailRepository) {
+                         OrderDetailRepository orderDetailRepository,
+                         BidRepository bidRepository) {
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.productCategoryRepository = productCategoryRepository;
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.customerRepository = customerRepository;
+        this.bidRepository = bidRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -113,8 +116,28 @@ public class InitDbService {
             orderDetailRepository.save(detail1);
             orderDetailRepository.save(detail2);
 
-
-
+            //Crear puja de prueba
+            Bid bid1 = new Bid();
+            bid1.setProduct(product1);
+            bid1.setCustomer(customer1);
+            bid1.setBidAmount(new BigDecimal("20.00"));
+            bid1.setBidTime(LocalDateTime.now());
+            bid1.setStatus(BidStatus.PENDING);
+            bidRepository.save(bid1);
+            Bid bid2 = new Bid();
+            bid2.setProduct(product2);
+            bid2.setCustomer(customer2);
+            bid2.setBidAmount(new BigDecimal("25.00"));
+            bid2.setBidTime(LocalDateTime.now());
+            bid2.setStatus(BidStatus.ACCEPTED);
+            bidRepository.save(bid2);
+            Bid bid3 = new Bid();
+            bid3.setProduct(product1);
+            bid3.setCustomer(customer2);
+            bid3.setBidAmount(new BigDecimal("30.00"));
+            bid3.setBidTime(LocalDateTime.now());
+            bid3.setStatus(BidStatus.ACCEPTED);
+            bidRepository.save(bid3);
 
             System.out.println("✅ Base de datos inicializada con clientes de prueba.");
         } else {

@@ -29,12 +29,23 @@ public class Bid {
 
     private LocalDateTime bidTime;
 
+    @Enumerated(EnumType.STRING)
+    private BidStatus status;
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public BidStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(BidStatus status) {
+        this.status = status;
     }
 
     public Product getProduct() {
