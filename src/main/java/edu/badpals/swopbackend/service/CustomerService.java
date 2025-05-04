@@ -1,8 +1,10 @@
 package edu.badpals.swopbackend.service;
+
 import edu.badpals.swopbackend.dto.CustomerDto;
 import edu.badpals.swopbackend.model.Customer;
 import edu.badpals.swopbackend.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,17 +15,19 @@ import java.util.stream.Collectors;
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, PasswordEncoder passwordEncoder) {
         this.customerRepository = customerRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     private CustomerDto toDto(Customer customer) {
         return new CustomerDto(
                 customer.getId(),
                 customer.getEmail(),
-                customer.getPassword(),
+                null,
                 customer.getFullName(),
                 customer.getBillingAddress(),
                 customer.getDefaultShippingAddress(),
@@ -32,11 +36,10 @@ public class CustomerService {
         );
     }
 
-
     private Customer toEntity(CustomerDto dto) {
         Customer customer = new Customer();
         customer.setEmail(dto.getEmail());
-        customer.setPassword(dto.getPassword());
+        customer.setPassword(passwordEncoder.encode(dto.getPassword())); // Encripta contraseña
         customer.setFullName(dto.getFullName());
         customer.setBillingAddress(dto.getBillingAddress());
         customer.setDefaultShippingAddress(dto.getDefaultShippingAddress());
@@ -53,8 +56,9 @@ public class CustomerService {
     }
 
     public List<CustomerDto> getAllCustomers() {
-        List<Customer> customers = customerRepository.findAll();
-        return customers.stream().map(this::toDto).collect(Collectors.toList());
+        return customerRepository.findAll().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     public CustomerDto getCustomerById(Long id) {
@@ -69,15 +73,19 @@ public class CustomerService {
                 .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + id));
 
         existingCustomer.setEmail(customerDto.getEmail());
-        existingCustomer.setPassword(customerDto.getPassword());
+
+        // si no esta vacía la encripta
+        if (customerDto.getPassword() != null && !customerDto.getPassword().isBlank()) {
+            existingCustomer.setPassword(passwordEncoder.encode(customerDto.getPassword()));
+        }
+
         existingCustomer.setFullName(customerDto.getFullName());
         existingCustomer.setBillingAddress(customerDto.getBillingAddress());
         existingCustomer.setDefaultShippingAddress(customerDto.getDefaultShippingAddress());
         existingCustomer.setCountry(customerDto.getCountry());
         existingCustomer.setPhone(customerDto.getPhone());
 
-        Customer updatedCustomer = customerRepository.save(existingCustomer);
-        return toDto(updatedCustomer);
+        return toDto(customerRepository.save(existingCustomer));
     }
 
     @Transactional
