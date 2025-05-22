@@ -47,12 +47,12 @@ public class InitDbService {
     public void initDatabase() {
         if (customerRepository.count() == 0) { // Si no hay clientes en la base de datos
             Customer customer1 = new Customer(
-                    "john.doe@example.com", passwordEncoder.encode("password123"),
+                    "Sergio", passwordEncoder.encode("root"),
                     "John Doe", "123 Main St", "123 Main St", "USA", "1234567890"
             );
 
             Customer customer2 = new Customer(
-                    "jane.doe@example.com", passwordEncoder.encode("password456"),
+                    "Pepe", passwordEncoder.encode("contraseña"),
                     "Jane Doe", "456 Elm St", "456 Elm St", "Canada", "0987654321"
             );
 
@@ -115,6 +115,27 @@ public class InitDbService {
 
             orderDetailRepository.save(detail1);
             orderDetailRepository.save(detail2);
+
+            // Crear un segundo pedido de prueba
+
+
+            Order order2 = new Order();
+            order2.setCustomer(customer2);
+            order2.setAmount(new BigDecimal("24.99"));
+            order2.setShippingAddress("456 Elm St");
+            order2.setOrderAddress("456 Elm St");
+            order2.setOrderDate(LocalDateTime.now());
+            order2.setOrderEmail("jane.doe@example.com");
+            order2.setPaymentMethod(PaymentMethod.PAYPAL);
+            order2.setOrderStatus(OrderStatus.PROCESSED);
+            order2.setOrderDetails(null);
+            Order savedOrder2 = orderRepository.save(order2);
+            // Crear detalles del segundo pedido
+            OrderDetail detail3 = new OrderDetail(savedOrder2, product1, product1.getPrice(), product1.getSku(), 1);
+            OrderDetail detail4 = new OrderDetail(savedOrder2, product3, product3.getPrice(), product3.getSku(), 1);
+            orderDetailRepository.save(detail3);
+            orderDetailRepository.save(detail4);
+
 
             //Crear puja de prueba
             Bid bid1 = new Bid();
