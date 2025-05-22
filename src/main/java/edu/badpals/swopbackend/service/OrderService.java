@@ -2,18 +2,23 @@ package edu.badpals.swopbackend.service;
 
 import edu.badpals.swopbackend.dto.OrderDetailDto;
 import edu.badpals.swopbackend.dto.OrderDto;
+import edu.badpals.swopbackend.model.Customer;
 import edu.badpals.swopbackend.model.Order;
 import edu.badpals.swopbackend.model.OrderDetail;
 import edu.badpals.swopbackend.model.Product;
+import edu.badpals.swopbackend.repository.CustomerRepository;
 import edu.badpals.swopbackend.repository.OrderDetailRepository;
 import edu.badpals.swopbackend.repository.OrderRepository;
 import edu.badpals.swopbackend.repository.ProductRepository;
 import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,68 +28,71 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final ProductRepository productRepository;
+    private final ModelMapper modelMapper;
+    private final CustomerRepository customerRepository;
+    private final AuthService authService;
+
 
     @Autowired
     public OrderService(OrderRepository orderRepository,
                         OrderDetailRepository orderDetailRepository,
-                        ProductRepository productRepository) {
+                        ProductRepository productRepository,
+                        ModelMapper modelMapper,
+                        CustomerRepository customerRepository,
+                        AuthService authService) {
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.productRepository = productRepository;
+        this.modelMapper = modelMapper;
+        this.customerRepository = customerRepository;
+        this.authService = authService;
     }
 
     private OrderDto toDto(Order order) {
+        OrderDto dto = modelMapper.map(order, OrderDto.class);
         Set<OrderDetailDto> details = order.getOrderDetails().stream()
-                .map(detail -> new OrderDetailDto(
-                        detail.getId(),
-                        detail.getOrder().getId(),
-                        detail.getProduct().getId(),
-                        detail.getPrice(),
-                        detail.getSku(),
-                        detail.getQuantity()
-                ))
+                .map(detail -> modelMapper.map(detail, OrderDetailDto.class))
                 .collect(Collectors.toSet());
-        return new OrderDto(
-                order.getId(), order.getCustomer(), details ,order.getAmount(), order.getShippingAddress(),
-                order.getOrderAddress(), order.getOrderEmail(), order.getOrderStatus(), order.getPaymentMethod(),
-                order.getOrderDate()
-        );
+        dto.setOrderDetails(details);
+        return dto;
     }
 
     private Order toEntity(OrderDto dto) {
-        Order order = new Order();
-        order.setCustomer(dto.getCustomer());
-        order.setAmount(dto.getAmount());
-        order.setShippingAddress(dto.getShippingAddress());
-        order.setOrderAddress(dto.getOrderAddress());
-        order.setOrderEmail(dto.getOrderEmail());
-        order.setOrderStatus(dto.getOrderStatus());
-        order.setPaymentMethod(dto.getPaymentMethod());
-        order.setOrderDate(dto.getOrderDate());
+        Order order = modelMapper.map(dto, Order.class);
+        if (dto.getOrderDetails() != null) {
+            Set<OrderDetail> details = dto.getOrderDetails().stream()
+                    .map(detailDto -> modelMapper.map(detailDto, OrderDetail.class))
+                    .collect(Collectors.toSet());
+            order.setOrderDetails(details);
+        }
         return order;
     }
 
+
     @Transactional
-    public OrderDto createOrder(OrderDto orderDto) {
+    public OrderDto createOrder(OrderDto orderDto, String authenticatedEmail) {
+        Customer customer = customerRepository.findByEmail(authenticatedEmail)
+                .orElseThrow(() -> new RuntimeException("Customer not found for email: " + authenticatedEmail));
+
         Order order = toEntity(orderDto);
+        order.setCustomer(customer);
+
         Order savedOrder = orderRepository.save(order);
 
         Set<OrderDetailDto> details = orderDto.getOrderDetails();
 
-        // todos los IDs de los productos de esa Order
         Set<Long> productIds = details.stream()
                 .map(OrderDetailDto::getProduct)
                 .collect(Collectors.toSet());
-        // se buscan los Products por ID para luego guardarlos en un Map (ID:Product)
+
         Map<Long, Product> productMap = productRepository.findAllById(productIds).stream()
                 .collect(Collectors.toMap(Product::getId, p -> p));
-        // para cada detalle de la Order se busca el Product en el Map y se crea el OrderDetail
+
         details.stream().map(detailDto -> {
             Product product = productMap.get(detailDto.getProduct());
             if (product == null) {
                 throw new RuntimeException("Product not found with ID: " + detailDto.getProduct());
             }
-
             return new OrderDetail(
                     savedOrder,
                     product,
@@ -102,6 +110,15 @@ public class OrderService {
         List<Order> orders = orderRepository.findAll();
         return orders.stream().map(this::toDto).collect(Collectors.toList());
     }
+
+    public List<OrderDto> getOrdersForCurrentUser() {
+        String email = authService.getCurrentUserEmail();
+        List<Order> orders = orderRepository.findByCustomerEmail(email);
+        return orders.stream()
+                .map(order -> modelMapper.map(order, OrderDto.class))
+                .collect(Collectors.toList());
+    }
+
 
     public OrderDto getOrderById(Long id) {
         Order order = orderRepository.findById(id)
@@ -158,14 +175,15 @@ public class OrderService {
 
 
     @Transactional
-    public void deleteOrder(Long id) {
-        if (!orderRepository.existsById(id)) {
-            throw new RuntimeException("Order not found with ID: " + id);
+    public void deleteOrder(Long orderId, String authenticatedEmail) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+
+        // Verificar que el email del cliente coincida con el autenticado
+        if (!order.getCustomer().getEmail().equals(authenticatedEmail)) {
+            throw new RuntimeException("You are not authorized to delete this order.");
         }
-        orderRepository.deleteById(id);
+
+        orderRepository.deleteById(orderId);
     }
-
-
-
-
 }

@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,8 +30,16 @@ public class OrderController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de pedidos obtenida exitosamente")
     })
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<OrderDto>> getAllOrders() {
         List<OrderDto> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(orders);
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/my-orders")
+    public ResponseEntity<List<OrderDto>> getMyOrders() {
+        List<OrderDto> orders = orderService.getOrdersForCurrentUser();
         return ResponseEntity.ok(orders);
     }
 
@@ -54,8 +64,9 @@ public class OrderController {
             @ApiResponse(responseCode = "201", description = "Pedido creado exitosamente"),
             @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
-    public ResponseEntity<OrderDto> createOrder(@RequestBody OrderDto orderDto) {
-        OrderDto newOrder = orderService.createOrder(orderDto);
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<OrderDto> createOrder(@RequestBody OrderDto orderDto,  Authentication authentication) {
+        OrderDto newOrder = orderService.createOrder(orderDto, authentication.getName());
         return ResponseEntity.status(HttpStatus.CREATED).body(newOrder);
     }
 
@@ -80,12 +91,10 @@ public class OrderController {
             @ApiResponse(responseCode = "204", description = "Pedido eliminado exitosamente"),
             @ApiResponse(responseCode = "404", description = "Pedido no encontrado")
     })
-    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        try {
-            orderService.deleteOrder(id);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteOrder(@PathVariable("id") Long id, Authentication authentication) {
+        String email = authentication.getName();
+        orderService.deleteOrder(id, email);
+        return ResponseEntity.noContent().build();
     }
 }
