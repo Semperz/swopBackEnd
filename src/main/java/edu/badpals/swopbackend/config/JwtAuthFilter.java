@@ -19,7 +19,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
-    @SuppressWarnings("null")
+    @SuppressWarnings({"null", "NullableProblems"})
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
