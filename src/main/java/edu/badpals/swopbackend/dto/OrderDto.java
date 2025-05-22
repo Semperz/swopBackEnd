@@ -1,7 +1,6 @@
 package edu.badpals.swopbackend.dto;
 
 import edu.badpals.swopbackend.model.Customer;
-import edu.badpals.swopbackend.model.OrderDetail;
 import edu.badpals.swopbackend.model.OrderStatus;
 import edu.badpals.swopbackend.model.PaymentMethod;
 

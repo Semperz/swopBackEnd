@@ -1,9 +1,5 @@
 package edu.badpals.swopbackend.dto;
 
-import edu.badpals.swopbackend.model.Order;
-import edu.badpals.swopbackend.model.Product;
-
-
 import java.math.BigDecimal;
 
 

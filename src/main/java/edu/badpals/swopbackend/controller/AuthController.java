@@ -1,6 +1,4 @@
 package edu.badpals.swopbackend.controller;
-
-import edu.badpals.swopbackend.config.JwtUtil;
 import edu.badpals.swopbackend.dto.AuthRequest;
 import edu.badpals.swopbackend.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,18 +1,14 @@
 package edu.badpals.swopbackend.service;
 
-import edu.badpals.swopbackend.dto.ProductDto;
 import edu.badpals.swopbackend.model.*;
 import edu.badpals.swopbackend.repository.*;
 import jakarta.annotation.PostConstruct;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class InitDbService {
