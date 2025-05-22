@@ -3,6 +3,7 @@ package edu.badpals.swopbackend.service;
 import edu.badpals.swopbackend.dto.CategoryDto;
 import edu.badpals.swopbackend.model.Category;
 import edu.badpals.swopbackend.repository.CategoryRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,28 +15,20 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, ModelMapper modelMapper) {
         this.categoryRepository = categoryRepository;
+        this.modelMapper = modelMapper;
     }
 
     private CategoryDto toDto(Category category) {
-        return new CategoryDto(
-                category.getId(),
-                category.getName(),
-                category.getDescription(),
-                category.getThumbnail()
-        );
+        return modelMapper.map(category, CategoryDto.class);
     }
 
     private Category toEntity(CategoryDto dto) {
-        Category category = new Category();
-        category.setId(dto.getId());
-        category.setName(dto.getName());
-        category.setDescription(dto.getDescription());
-        category.setThumbnail(dto.getThumbnail());
-        return category;
+        return modelMapper.map(dto, Category.class);
     }
 
     @Transactional

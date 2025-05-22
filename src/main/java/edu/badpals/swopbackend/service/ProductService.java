@@ -6,6 +6,7 @@ import edu.badpals.swopbackend.model.ProductCategory;
 import edu.badpals.swopbackend.repository.ProductRepository;
 import edu.badpals.swopbackend.repository.CategoryRepository;
 import edu.badpals.swopbackend.repository.ProductCategoryRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,38 +22,31 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final ProductCategoryRepository productCategoryRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public ProductService(ProductRepository productRepository, CategoryRepository categoryRepository, ProductCategoryRepository productCategoryRepository) {
+    public ProductService(ProductRepository productRepository,
+                          CategoryRepository categoryRepository,
+                          ProductCategoryRepository productCategoryRepository,
+                          ModelMapper modelMapper) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.productCategoryRepository = productCategoryRepository;
+        this.modelMapper = modelMapper;
     }
 
     private ProductDto toDto(Product product) {
+        ProductDto dto = modelMapper.map(product, ProductDto.class);
+        // Extraer IDs de categorías
         List<Long> categoryIds = product.getCategories().stream()
                 .map(pc -> pc.getCategory().getId())
                 .collect(Collectors.toList());
-
-        return new ProductDto(
-                product.getId(), product.getSku(), product.getName(), product.getPrice(),
-                product.getWeight(), product.getDescriptions(), product.getThumbnail(),
-                product.getImage(), categoryIds, product.getStock(), product.getCreateDate()
-        );
+        dto.setCategories(categoryIds);
+        return dto;
     }
 
     private Product toEntity(ProductDto dto) {
-        Product product = new Product();
-        product.setSku(dto.getSku());
-        product.setName(dto.getName());
-        product.setPrice(dto.getPrice());
-        product.setWeight(dto.getWeight());
-        product.setDescriptions(dto.getDescriptions());
-        product.setThumbnail(dto.getThumbnail());
-        product.setImage(dto.getImage());
-        product.setStock(dto.getStock());
-        product.setCreateDate(dto.getCreateDate());
-        return product;
+        return modelMapper.map(dto, Product.class);
     }
 
     @Transactional
@@ -60,7 +54,7 @@ public class ProductService {
         Product product = toEntity(productDto);
         Product savedProduct = productRepository.save(product);
 
-        // Guardamos la relación en ProductCategory
+        // Asociar categorías
         List<ProductCategory> productCategories = productDto.getCategories().stream()
                 .map(categoryId -> {
                     Category category = categoryRepository.findById(categoryId)
@@ -76,7 +70,9 @@ public class ProductService {
     }
 
     public List<ProductDto> getAllProducts() {
-        return productRepository.findAll().stream().map(this::toDto).collect(Collectors.toList());
+        return productRepository.findAll().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     public ProductDto getProductById(Long id) {
@@ -95,37 +91,24 @@ public class ProductService {
 
     @Transactional
     public ProductDto updateProduct(Long id, ProductDto productDto) {
-        // Buscar el producto en la base de datos
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found with ID: " + id));
 
-        // Actualizar datos del producto
-        existingProduct.setSku(productDto.getSku());
-        existingProduct.setName(productDto.getName());
-        existingProduct.setPrice(productDto.getPrice());
-        existingProduct.setWeight(productDto.getWeight());
-        existingProduct.setDescriptions(productDto.getDescriptions());
-        existingProduct.setThumbnail(productDto.getThumbnail());
-        existingProduct.setImage(productDto.getImage());
-        existingProduct.setStock(productDto.getStock());
+        // Actualiza campos básicos con modelMapper
+        modelMapper.map(productDto, existingProduct);
 
-        // Categorias actuales del producto
+        // Actualiza relaciones con categorías
         List<ProductCategory> currentCategories = productCategoryRepository.findByProduct(existingProduct);
-
-        // Extraer los IDs de las categorías actuales
         Set<Long> currentCategoryIds = currentCategories.stream()
                 .map(pc -> pc.getCategory().getId())
                 .collect(Collectors.toSet());
 
-        // Extraer los nuevos IDs de categorías del DTO
         Set<Long> newCategoryIds = new HashSet<>(productDto.getCategories());
 
-        // Determinar categorías a eliminar (las que ya no están en la nueva lista)
         List<ProductCategory> categoriesToRemove = currentCategories.stream()
                 .filter(pc -> !newCategoryIds.contains(pc.getCategory().getId()))
                 .collect(Collectors.toList());
 
-        // Determinar categorías a añadir (las nuevas que no estaban antes)
         List<ProductCategory> categoriesToAdd = newCategoryIds.stream()
                 .filter(categoryId -> !currentCategoryIds.contains(categoryId))
                 .map(categoryId -> {
@@ -136,15 +119,11 @@ public class ProductService {
                 .collect(Collectors.toList());
 
         productCategoryRepository.deleteAll(categoriesToRemove);
-
         productCategoryRepository.saveAll(categoriesToAdd);
 
-        // Actualizar la lista de categorías en el producto
         existingProduct.setCategories(productCategoryRepository.findByProduct(existingProduct));
-
         Product updatedProduct = productRepository.save(existingProduct);
 
         return toDto(updatedProduct);
     }
-
 }

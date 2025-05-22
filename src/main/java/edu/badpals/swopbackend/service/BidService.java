@@ -8,6 +8,7 @@ import edu.badpals.swopbackend.model.Product;
 import edu.badpals.swopbackend.repository.BidRepository;
 import edu.badpals.swopbackend.repository.CustomerRepository;
 import edu.badpals.swopbackend.repository.ProductRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,25 +22,24 @@ public class BidService {
     private final BidRepository bidRepository;
     private final ProductRepository productRepository;
     private final CustomerRepository customerRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public BidService(BidRepository bidRepository,
                       ProductRepository productRepository,
-                      CustomerRepository customerRepository) {
+                      CustomerRepository customerRepository,
+                      ModelMapper modelMapper) {
         this.bidRepository = bidRepository;
         this.productRepository = productRepository;
         this.customerRepository = customerRepository;
+        this.modelMapper = modelMapper;
     }
 
     private BidDto toDto(Bid bid) {
-        return new BidDto(
-                bid.getId(),
-                bid.getProduct().getId(),
-                bid.getCustomer().getId(),
-                bid.getBidAmount(),
-                bid.getBidTime(),
-                bid.getStatus()
-        );
+        BidDto dto = modelMapper.map(bid, BidDto.class);
+        dto.setProductId(bid.getProduct().getId());
+        dto.setCustomerId(bid.getCustomer().getId());
+        return dto;
     }
 
     private Bid toEntity(BidDto dto) {
@@ -48,12 +48,15 @@ public class BidService {
         Customer customer = customerRepository.findById(dto.getCustomerId())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        Bid bid = new Bid();
+        Bid bid = modelMapper.map(dto, Bid.class);
         bid.setProduct(product);
         bid.setCustomer(customer);
-        bid.setBidAmount(dto.getBidAmount());
-        bid.setBidTime(dto.getBidTime() != null ? dto.getBidTime() : LocalDateTime.now());
-        bid.setStatus(dto.getStatus() != null ? dto.getStatus() : BidStatus.PENDING);
+        if (bid.getBidTime() == null) {
+            bid.setBidTime(LocalDateTime.now());
+        }
+        if (bid.getStatus() == null) {
+            bid.setStatus(BidStatus.PENDING);
+        }
         return bid;
     }
 
