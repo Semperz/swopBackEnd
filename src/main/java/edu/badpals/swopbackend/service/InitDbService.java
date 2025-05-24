@@ -42,6 +42,7 @@ public class InitDbService {
     @PostConstruct
     public void initDatabase() {
         if (customerRepository.count() == 0) { // Si no hay clientes en la base de datos
+            // Clientes
             Customer customer1 = new Customer(
                     "Sergio", passwordEncoder.encode("root"),
                     "John Doe", "123 Main St", "123 Main St", "USA", "1234567890"
@@ -52,10 +53,16 @@ public class InitDbService {
                     "Jane Doe", "456 Elm St", "456 Elm St", "Canada", "0987654321"
             );
 
+            Customer customer3 = new Customer(
+                    "Ana", passwordEncoder.encode("123456"),
+                    "Ana Smith", "789 Oak St", "789 Oak St", "UK", "5555555555"
+            );
+
             customerRepository.save(customer1);
             customerRepository.save(customer2);
+            customerRepository.save(customer3);
 
-            // Crear categorías de Star Wars
+            // Categorías
             Category category1 = new Category("Star Wars Action Figures", "Figuras de acción de Star Wars", "thumbnail1.jpg");
             Category category2 = new Category("Star Wars LEGO Sets", "Sets de LEGO de Star Wars", "thumbnail2.jpg");
             Category category3 = new Category("Star Wars Collectibles", "Coleccionables de Star Wars", "thumbnail3.jpg");
@@ -63,7 +70,7 @@ public class InitDbService {
             categoryRepository.save(category2);
             categoryRepository.save(category3);
 
-            // Crear productos de Star Wars
+            // Productos
             Product product1 = new Product("SW001", "Luke Skywalker Action Figure", new BigDecimal("19.99"), 0.5, "Figura de acción de Luke Skywalker", "thumbnail1.jpg", "image1.jpg", null, 100);
             Product product2 = new Product("SW002", "Darth Vader Action Figure", new BigDecimal("24.99"), 0.6, "Figura de acción de Darth Vader", "thumbnail2.jpg", "image2.jpg", null, 100);
             Product product3 = new Product("SW003", "Millennium Falcon LEGO Set", new BigDecimal("149.99"), 2.5, "Set de LEGO del Millennium Falcon", "thumbnail3.jpg", "image3.jpg", null, 50);
@@ -71,7 +78,7 @@ public class InitDbService {
             productRepository.save(product2);
             productRepository.save(product3);
 
-            // Crear relaciones entre productos y categorías
+            // Relación productos-categorías
             ProductCategory productCategory1 = new ProductCategory(product1, category1);
             ProductCategory productCategory2 = new ProductCategory(product1, category3);
             ProductCategory productCategory3 = new ProductCategory(product2, category1);
@@ -90,57 +97,73 @@ public class InitDbService {
             productRepository.save(product2);
             productRepository.save(product3);
 
-            // Crear un pedido de prueba
-            Order order1 = new Order();
-            order1.setCustomer(customer1);
-            order1.setAmount(new BigDecimal("44.97"));
-            order1.setShippingAddress("123 Main St");
-            order1.setOrderAddress("123 Main St");
-            order1.setOrderDate(LocalDateTime.now());
-            order1.setOrderEmail("prueba@prueba.com");
-            order1.setPaymentMethod(PaymentMethod.CREDIT_CARD);
-            order1.setOrderStatus(OrderStatus.PROCESSED);
-            order1.setOrderDetails(null);
+            // Pedidos para Pepe
+            Order pepeOrder1 = new Order();
+            pepeOrder1.setCustomer(customer2);
+            pepeOrder1.setAmount(new BigDecimal("24.99"));
+            pepeOrder1.setShippingAddress("456 Elm St");
+            pepeOrder1.setOrderAddress("456 Elm St");
+            pepeOrder1.setOrderDate(LocalDateTime.now());
+            pepeOrder1.setOrderEmail("pepe@example.com");
+            pepeOrder1.setPaymentMethod(PaymentMethod.PAYPAL);
+            pepeOrder1.setOrderStatus(OrderStatus.PROCESSED);
+            pepeOrder1.setOrderDetails(null);
+            Order savedPepeOrder1 = orderRepository.save(pepeOrder1);
 
-            Order savedOrder1 = orderRepository.save(order1);
+            OrderDetail pepeDetail1 = new OrderDetail(savedPepeOrder1, product1, product1.getPrice(), product1.getSku(), 1);
+            OrderDetail pepeDetail2 = new OrderDetail(savedPepeOrder1, product3, product3.getPrice(), product3.getSku(), 1);
+            orderDetailRepository.save(pepeDetail1);
+            orderDetailRepository.save(pepeDetail2);
 
+            Order pepeOrder2 = new Order();
+            pepeOrder2.setCustomer(customer2);
+            pepeOrder2.setAmount(new BigDecimal("49.98"));
+            pepeOrder2.setShippingAddress("456 Elm St");
+            pepeOrder2.setOrderAddress("456 Elm St");
+            pepeOrder2.setOrderDate(LocalDateTime.now());
+            pepeOrder2.setOrderEmail("pepe@example.com");
+            pepeOrder2.setPaymentMethod(PaymentMethod.CREDIT_CARD);
+            pepeOrder2.setOrderStatus(OrderStatus.PROCESSED);
+            pepeOrder2.setOrderDetails(null);
+            Order savedPepeOrder2 = orderRepository.save(pepeOrder2);
 
-            // Crear detalles del pedido
-            OrderDetail detail1 = new OrderDetail(savedOrder1, product1, product1.getPrice(), product1.getSku(), 2);
-            OrderDetail detail2 = new OrderDetail(savedOrder1, product2, product2.getPrice(), product2.getSku(), 4);
+            OrderDetail pepeDetail3 = new OrderDetail(savedPepeOrder2, product2, product2.getPrice(), product2.getSku(), 2);
+            orderDetailRepository.save(pepeDetail3);
 
-            orderDetailRepository.save(detail1);
-            orderDetailRepository.save(detail2);
+            // Pedidos para Ana
+            Order anaOrder1 = new Order();
+            anaOrder1.setCustomer(customer3);
+            anaOrder1.setAmount(new BigDecimal("174.98"));
+            anaOrder1.setShippingAddress("789 Oak St");
+            anaOrder1.setOrderAddress("789 Oak St");
+            anaOrder1.setOrderDate(LocalDateTime.now());
+            anaOrder1.setOrderEmail("ana.smith@example.com");
+            anaOrder1.setPaymentMethod(PaymentMethod.CREDIT_CARD);
+            anaOrder1.setOrderStatus(OrderStatus.PROCESSED);
+            anaOrder1.setOrderDetails(null);
+            Order savedAnaOrder1 = orderRepository.save(anaOrder1);
 
-            // Crear un segundo pedido de prueba
+            OrderDetail anaDetail1 = new OrderDetail(savedAnaOrder1, product3, product3.getPrice(), product3.getSku(), 1);
+            OrderDetail anaDetail2 = new OrderDetail(savedAnaOrder1, product1, product1.getPrice(), product1.getSku(), 3);
+            orderDetailRepository.save(anaDetail1);
+            orderDetailRepository.save(anaDetail2);
 
+            Order anaOrder2 = new Order();
+            anaOrder2.setCustomer(customer3);
+            anaOrder2.setAmount(new BigDecimal("24.99"));
+            anaOrder2.setShippingAddress("789 Oak St");
+            anaOrder2.setOrderAddress("789 Oak St");
+            anaOrder2.setOrderDate(LocalDateTime.now());
+            anaOrder2.setOrderEmail("ana.smith@example.com");
+            anaOrder2.setPaymentMethod(PaymentMethod.PAYPAL);
+            anaOrder2.setOrderStatus(OrderStatus.PROCESSED);
+            anaOrder2.setOrderDetails(null);
+            Order savedAnaOrder2 = orderRepository.save(anaOrder2);
 
-            Order order2 = new Order();
-            order2.setCustomer(customer2);
-            order2.setAmount(new BigDecimal("24.99"));
-            order2.setShippingAddress("456 Elm St");
-            order2.setOrderAddress("456 Elm St");
-            order2.setOrderDate(LocalDateTime.now());
-            order2.setOrderEmail("jane.doe@example.com");
-            order2.setPaymentMethod(PaymentMethod.PAYPAL);
-            order2.setOrderStatus(OrderStatus.PROCESSED);
-            order2.setOrderDetails(null);
-            Order savedOrder2 = orderRepository.save(order2);
-            // Crear detalles del segundo pedido
-            OrderDetail detail3 = new OrderDetail(savedOrder2, product1, product1.getPrice(), product1.getSku(), 1);
-            OrderDetail detail4 = new OrderDetail(savedOrder2, product3, product3.getPrice(), product3.getSku(), 1);
-            orderDetailRepository.save(detail3);
-            orderDetailRepository.save(detail4);
+            OrderDetail anaDetail3 = new OrderDetail(savedAnaOrder2, product2, product2.getPrice(), product2.getSku(), 1);
+            orderDetailRepository.save(anaDetail3);
 
-
-            //Crear puja de prueba
-            Bid bid1 = new Bid();
-            bid1.setProduct(product1);
-            bid1.setCustomer(customer1);
-            bid1.setBidAmount(new BigDecimal("20.00"));
-            bid1.setBidTime(LocalDateTime.now());
-            bid1.setStatus(BidStatus.PENDING);
-            bidRepository.save(bid1);
+            // Pujas para Pepe
             Bid bid2 = new Bid();
             bid2.setProduct(product2);
             bid2.setCustomer(customer2);
@@ -148,6 +171,7 @@ public class InitDbService {
             bid2.setBidTime(LocalDateTime.now());
             bid2.setStatus(BidStatus.ACCEPTED);
             bidRepository.save(bid2);
+
             Bid bid3 = new Bid();
             bid3.setProduct(product1);
             bid3.setCustomer(customer2);
@@ -156,7 +180,40 @@ public class InitDbService {
             bid3.setStatus(BidStatus.ACCEPTED);
             bidRepository.save(bid3);
 
-            System.out.println("✅ Base de datos inicializada con clientes de prueba.");
+            Bid bid7 = new Bid();
+            bid7.setProduct(product3);
+            bid7.setCustomer(customer2);
+            bid7.setBidAmount(new BigDecimal("140.00"));
+            bid7.setBidTime(LocalDateTime.now());
+            bid7.setStatus(BidStatus.PENDING);
+            bidRepository.save(bid7);
+
+            // Pujas para Ana
+            Bid bid5 = new Bid();
+            bid5.setProduct(product2);
+            bid5.setCustomer(customer3);
+            bid5.setBidAmount(new BigDecimal("27.50"));
+            bid5.setBidTime(LocalDateTime.now());
+            bid5.setStatus(BidStatus.PENDING);
+            bidRepository.save(bid5);
+
+            Bid bid6 = new Bid();
+            bid6.setProduct(product3);
+            bid6.setCustomer(customer3);
+            bid6.setBidAmount(new BigDecimal("170.00"));
+            bid6.setBidTime(LocalDateTime.now());
+            bid6.setStatus(BidStatus.PENDING);
+            bidRepository.save(bid6);
+
+            Bid bid8 = new Bid();
+            bid8.setProduct(product1);
+            bid8.setCustomer(customer3);
+            bid8.setBidAmount(new BigDecimal("22.00"));
+            bid8.setBidTime(LocalDateTime.now());
+            bid8.setStatus(BidStatus.PENDING);
+            bidRepository.save(bid8);
+
+            System.out.println("✅ Base de datos inicializada con clientes, pedidos y pujas de prueba.");
         } else {
             System.out.println("ℹ️ La base de datos ya contiene datos, no se inicializará.");
         }

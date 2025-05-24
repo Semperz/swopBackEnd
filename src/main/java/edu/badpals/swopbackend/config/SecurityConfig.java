@@ -28,10 +28,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/products/**", "/api/categories/**").permitAll()
-                        .requestMatchers("/api/customers/**").hasRole("ADMIN")
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/customers").permitAll() // registro
-                        // orders: POST requiere login, GET y DELETE gestinados en controller
+                        .requestMatchers("/api/customers/me/**").hasRole("USER")
+                        .requestMatchers("/api/customers/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/orders/**").authenticated()
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

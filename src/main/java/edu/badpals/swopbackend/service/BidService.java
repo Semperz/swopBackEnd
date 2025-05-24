@@ -11,6 +11,7 @@ import edu.badpals.swopbackend.repository.ProductRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,16 +24,18 @@ public class BidService {
     private final ProductRepository productRepository;
     private final CustomerRepository customerRepository;
     private final ModelMapper modelMapper;
+    private final AuthService authService;
 
     @Autowired
     public BidService(BidRepository bidRepository,
                       ProductRepository productRepository,
                       CustomerRepository customerRepository,
-                      ModelMapper modelMapper) {
+                      ModelMapper modelMapper, AuthService authService) {
         this.bidRepository = bidRepository;
         this.productRepository = productRepository;
         this.customerRepository = customerRepository;
         this.modelMapper = modelMapper;
+        this.authService = authService;
     }
 
     private BidDto toDto(Bid bid) {
@@ -42,26 +45,31 @@ public class BidService {
         return dto;
     }
 
-    private Bid toEntity(BidDto dto) {
+    private Bid toEntity(BidDto dto, Customer customer) {
         Product product = productRepository.findById(dto.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
-        Customer customer = customerRepository.findById(dto.getCustomerId())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         Bid bid = modelMapper.map(dto, Bid.class);
         bid.setProduct(product);
         bid.setCustomer(customer);
+
         if (bid.getBidTime() == null) {
             bid.setBidTime(LocalDateTime.now());
         }
         if (bid.getStatus() == null) {
             bid.setStatus(BidStatus.PENDING);
         }
+
         return bid;
     }
 
+    @Transactional
     public BidDto placeBid(BidDto dto) {
-        Bid bid = toEntity(dto);
+        String email = authService.getCurrentUserEmail();
+        Customer customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer not found with email: " + email));
+
+        Bid bid = toEntity(dto, customer);
         Bid saved = bidRepository.save(bid);
         return toDto(saved);
     }
@@ -72,8 +80,12 @@ public class BidService {
                 .collect(Collectors.toList());
     }
 
-    public List<BidDto> getBidsByCustomer(Long customerId) {
-        return bidRepository.findByCustomerId(customerId)
+    public List<BidDto> getBidsForCurrentUser() {
+        String email = authService.getCurrentUserEmail();
+        Customer customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer not found with email: " + email));
+
+        return bidRepository.findByCustomerId(customer.getId())
                 .stream().map(this::toDto)
                 .collect(Collectors.toList());
     }
@@ -90,13 +102,36 @@ public class BidService {
                 .orElse(null);
     }
 
+    @Transactional
     public void deleteBid(Long bidId) {
-        if (!bidRepository.existsById(bidId)) {
-            throw new RuntimeException("Bid not found");
+        String email = authService.getCurrentUserEmail();
+        Bid bid = bidRepository.findById(bidId)
+                .orElseThrow(() -> new RuntimeException("Bid not found"));
+
+        if (!bid.getCustomer().getEmail().equals(email)) {
+            throw new RuntimeException("You are not authorized to delete this bid.");
         }
+
         bidRepository.deleteById(bidId);
     }
 
+    @Transactional
+    public BidDto updateBid(Long bidId, BidDto bidDto) {
+        String email = authService.getCurrentUserEmail();
+        Bid existingBid = bidRepository.findById(bidId)
+                .orElseThrow(() -> new RuntimeException("Bid not found"));
+
+        if (!existingBid.getCustomer().getEmail().equals(email)) {
+            throw new RuntimeException("You are not authorized to update this bid.");
+        }
+
+        existingBid.setBidAmount(bidDto.getBidAmount());
+        existingBid.setBidTime(LocalDateTime.now());
+
+        return toDto(bidRepository.save(existingBid));
+    }
+
+    @Transactional
     public BidDto updateBidStatus(Long bidId, BidStatus status) {
         Bid bid = bidRepository.findById(bidId)
                 .orElseThrow(() -> new RuntimeException("Bid not found"));
