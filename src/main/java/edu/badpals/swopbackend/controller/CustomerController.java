@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class CustomerController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Lista de clientes obtenida exitosamente")
     })
+    @PreAuthorize("hasRole('ADMIN')") // Solo administradores pueden ver todos los clientes
     public ResponseEntity<List<CustomerDto>> getAllCustomers() {
         List<CustomerDto> customers = customerService.getAllCustomers();
         return ResponseEntity.ok(customers);
@@ -40,6 +42,7 @@ public class CustomerController {
             @ApiResponse(responseCode = "200", description = "Cliente encontrado"),
             @ApiResponse(responseCode = "404", description = "Cliente no encontrado")
     })
+    @PreAuthorize("hasRole('ADMIN')") // Solo administradores o el propio cliente
     public ResponseEntity<CustomerDto> getCustomerById(@PathVariable Long id) {
         try {
             CustomerDto customer = customerService.getCustomerById(id);
@@ -66,6 +69,7 @@ public class CustomerController {
             @ApiResponse(responseCode = "200", description = "Cliente actualizado correctamente"),
             @ApiResponse(responseCode = "404", description = "Cliente no encontrado")
     })
+    @PreAuthorize("hasRole('ADMIN')") // Solo administradores pueden actualizar clientes
     public ResponseEntity<CustomerDto> updateCustomer(@PathVariable Long id, @RequestBody CustomerDto customerDto) {
         try {
             CustomerDto updatedCustomer = customerService.updateCustomer(id, customerDto);
@@ -88,6 +92,28 @@ public class CustomerController {
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    // Usuario autenticado ve su propio perfil
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/me")
+    public ResponseEntity<CustomerDto> getCurrentCustomer() {
+        return ResponseEntity.ok(customerService.getCurrentCustomer());
+    }
+
+    // Usuario autenticado solo actualiza su perfil
+    @PreAuthorize("hasRole('USER')")
+    @PutMapping("/me")
+    public ResponseEntity<CustomerDto> updateCurrentCustomer(@RequestBody CustomerDto customerDto) {
+        return ResponseEntity.ok(customerService.updateCurrentCustomer(customerDto));
+    }
+
+    // Usuario autenticado elimina su propio perfil
+    @PreAuthorize("hasRole('USER')")
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteCurrentCustomer() {
+        customerService.deleteCurrentCustomer();
+        return ResponseEntity.noContent().build();
     }
 }
 

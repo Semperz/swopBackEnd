@@ -18,12 +18,14 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    private final AuthService authService;
 
     @Autowired
-    public CustomerService(CustomerRepository customerRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
+    public CustomerService(CustomerRepository customerRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper, AuthService authService) {
         this.customerRepository = customerRepository;
         this.passwordEncoder = passwordEncoder;
         this.modelMapper = modelMapper;
+        this.authService = authService;
     }
 
     private CustomerDto toDto(Customer customer) {
@@ -54,6 +56,13 @@ public class CustomerService {
         return toDto(customer);
     }
 
+    public CustomerDto getCurrentCustomer() {
+        String email = authService.getCurrentUserEmail();
+        Customer customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer not found with email: " + email));
+        return toDto(customer);
+    }
+
     @Transactional
     public CustomerDto updateCustomer(Long id, CustomerDto customerDto) {
         Customer existingCustomer = customerRepository.findById(id)
@@ -67,11 +76,31 @@ public class CustomerService {
         return toDto(customerRepository.save(existingCustomer));
     }
 
+    public CustomerDto updateCurrentCustomer(CustomerDto customerDto) {
+        String email = authService.getCurrentUserEmail();
+        Customer customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        modelMapper.map(customerDto, customer);
+        if (customerDto.getPassword() != null && !customerDto.getPassword().isBlank()) {
+            customer.setPassword(passwordEncoder.encode(customerDto.getPassword()));
+        }
+
+        return toDto(customerRepository.save(customer));
+    }
+
     @Transactional
     public void deleteCustomer(Long id) {
         if (!customerRepository.existsById(id)) {
             throw new RuntimeException("Customer not found with ID: " + id);
         }
         customerRepository.deleteById(id);
+    }
+
+    public void deleteCurrentCustomer() {
+        String email = authService.getCurrentUserEmail();
+        Customer customer = customerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        customerRepository.delete(customer);
     }
 }
