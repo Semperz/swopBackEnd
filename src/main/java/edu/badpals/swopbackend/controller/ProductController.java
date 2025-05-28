@@ -88,4 +88,18 @@ public class ProductController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/category/{categoryId}")
+    @Operation(summary = "Obtener productos por categoría", description = "Lista de productos filtrados por categoría.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Productos obtenidos exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Categoría no encontrada")
+    })
+    public ResponseEntity<List<ProductDto>> getProductsByCategory(@PathVariable Long categoryId) {
+        List<ProductDto> products = productService.getProductsByCategory(categoryId);
+        if (products.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(products);
+    }
 }

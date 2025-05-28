@@ -81,6 +81,13 @@ public class ProductService {
         return toDto(product);
     }
 
+    public List<ProductDto> getProductsByCategory(Long categoryId) {
+        List<Product> products = productRepository.findByProductCategories_Category_Id(categoryId);
+        return products.stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public void deleteProduct(Long id) {
         if (!productRepository.existsById(id)) {
