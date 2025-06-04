@@ -177,55 +177,6 @@ public class InitDbService {
             OrderDetail anaDetail3 = new OrderDetail(savedAnaOrder2, product2, product2.getPrice(), product2.getSku(), 1);
             orderDetailRepository.save(anaDetail3);
 
-            // Pujas para Pepe
-            Bid bid2 = new Bid();
-            bid2.setProduct(product2);
-            bid2.setCustomer(customer2);
-            bid2.setBidAmount(new BigDecimal("25.00"));
-            bid2.setBidTime(LocalDateTime.now());
-            bid2.setStatus(BidStatus.ACCEPTED);
-            bidRepository.save(bid2);
-
-            Bid bid3 = new Bid();
-            bid3.setProduct(product1);
-            bid3.setCustomer(customer2);
-            bid3.setBidAmount(new BigDecimal("30.00"));
-            bid3.setBidTime(LocalDateTime.now());
-            bid3.setStatus(BidStatus.ACCEPTED);
-            bidRepository.save(bid3);
-
-            Bid bid7 = new Bid();
-            bid7.setProduct(product3);
-            bid7.setCustomer(customer2);
-            bid7.setBidAmount(new BigDecimal("140.00"));
-            bid7.setBidTime(LocalDateTime.now());
-            bid7.setStatus(BidStatus.PENDING);
-            bidRepository.save(bid7);
-
-            // Pujas para Ana
-            Bid bid5 = new Bid();
-            bid5.setProduct(product2);
-            bid5.setCustomer(customer3);
-            bid5.setBidAmount(new BigDecimal("27.50"));
-            bid5.setBidTime(LocalDateTime.now());
-            bid5.setStatus(BidStatus.PENDING);
-            bidRepository.save(bid5);
-
-            Bid bid6 = new Bid();
-            bid6.setProduct(product3);
-            bid6.setCustomer(customer3);
-            bid6.setBidAmount(new BigDecimal("170.00"));
-            bid6.setBidTime(LocalDateTime.now());
-            bid6.setStatus(BidStatus.PENDING);
-            bidRepository.save(bid6);
-
-            Bid bid8 = new Bid();
-            bid8.setProduct(product1);
-            bid8.setCustomer(customer3);
-            bid8.setBidAmount(new BigDecimal("22.00"));
-            bid8.setBidTime(LocalDateTime.now());
-            bid8.setStatus(BidStatus.PENDING);
-            bidRepository.save(bid8);
 
             System.out.println("✅ Base de datos inicializada con clientes, pedidos y pujas de prueba.");
         } else {
