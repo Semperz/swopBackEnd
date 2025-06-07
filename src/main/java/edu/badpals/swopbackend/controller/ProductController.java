@@ -66,10 +66,15 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Producto no encontrado")
     })
     public ResponseEntity<ProductDto> updateProduct(@PathVariable Long id, @RequestBody ProductDto productDto) {
+        System.out.println("Entró al updateProduct con id = " + id);
         try {
             ProductDto updatedProduct = productService.updateProduct(id, productDto);
+            if (updatedProduct == null) {
+                return ResponseEntity.notFound().build();
+            }
             return ResponseEntity.ok(updatedProduct);
         } catch (RuntimeException e) {
+            System.err.println("Error en updateProduct: " + e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
@@ -102,4 +107,20 @@ public class ProductController {
         }
         return ResponseEntity.ok(products);
     }
+
+    @GetMapping("/auction")
+    @Operation(summary = "Obtener producto en subasta", description = "Lista de producto que está actualmente en subasta.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Producto en subasta obtenido exitosamente"),
+            @ApiResponse(responseCode = "404", description = "No hay productos en subasta")
+    })
+    public ResponseEntity<ProductDto> getAuctedProduct() {
+        try {
+            ProductDto product = productService.getAuctedProduct();
+            return ResponseEntity.ok(product);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

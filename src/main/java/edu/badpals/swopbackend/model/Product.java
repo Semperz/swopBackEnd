@@ -27,6 +27,8 @@ public class Product {
     private String descriptions;
     private String thumbnail;
     private String image;
+    @Column
+    private LocalDateTime auctionEndTime;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductCategory> productCategories;
@@ -40,7 +42,7 @@ public class Product {
     public Product() {
     }
 
-    public Product(String sku, String name, BigDecimal price, Double weight, String descriptions, String thumbnail, String image, List<ProductCategory> productCategories, Integer stock) {
+    public Product(String sku, String name, BigDecimal price, Double weight, String descriptions, String thumbnail, String image, List<ProductCategory> productCategories, Integer stock, LocalDateTime auctionEndTime) {
         this.sku = sku;
         this.name = name;
         this.price = price;
@@ -50,6 +52,7 @@ public class Product {
         this.image = image;
         this.productCategories = productCategories;
         this.stock = stock;
+        this.auctionEndTime = auctionEndTime;
     }
 
     public Long getId() {
@@ -138,6 +141,14 @@ public class Product {
 
     public void setCreateDate(LocalDateTime createDate) {
         this.createDate = createDate;
+    }
+
+    public LocalDateTime getAuctionEndTime() {
+        return auctionEndTime;
+    }
+
+    public void setAuctionEndTime(LocalDateTime auctionEndTime) {
+        this.auctionEndTime = auctionEndTime;
     }
 }
 

@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -22,10 +23,14 @@ public class ModelMapperConfig {
         modelMapper.addMappings(new PropertyMap<Product, ProductDto>() {
             @Override
             protected void configure() {
-                using(ctx -> ((List<ProductCategory>) ctx.getSource()).stream()
-                        .map(ProductCategory::getId)
-                        .collect(Collectors.toList()))
-                        .map(source.getCategories(), destination.getCategories());
+                skip(destination.getCategories()); // Evita errores al mapear a DTO
+            }
+        });
+
+        modelMapper.addMappings(new PropertyMap<ProductDto, Product>() {
+            @Override
+            protected void configure() {
+                skip(destination.getCategories()); // Evita sobrescribir la lista con nulls
             }
         });
         modelMapper.addMappings(new PropertyMap<OrderDetail, OrderDetailDto>() {
@@ -34,6 +39,9 @@ public class ModelMapperConfig {
                 map().setOrder(source.getOrder().getId());  // Solo el ID
                 map().setProduct(source.getProduct().getId()); // Lo mismo si product es entidad
             }
+        });
+        modelMapper.typeMap(ProductDto.class, Product.class).addMappings(mapper -> {
+            mapper.skip(Product::setId);
         });
 
         return modelMapper;

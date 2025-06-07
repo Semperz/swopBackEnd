@@ -37,7 +37,7 @@ public class BidController {
     @Operation(summary = "Obtiene pujas por producto", description = "Devuelve todas las pujas realizadas para un producto")
     @ApiResponse(responseCode = "200", description = "Listado de pujas por producto")
     @GetMapping("/product/{productId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<BidDto>> getBidsByProduct(@PathVariable Long productId) {
         return ResponseEntity.ok(bidService.getBidsByProduct(productId));
     }
@@ -46,7 +46,11 @@ public class BidController {
     @ApiResponse(responseCode = "200", description = "Puja más alta encontrada")
     @GetMapping("/product/{productId}/highest")
     public ResponseEntity<BidDto> getHighestBid(@PathVariable Long productId) {
-        return ResponseEntity.ok(bidService.getHighestBidForProduct(productId));
+        BidDto highest = bidService.getHighestBidForProduct(productId);
+        if (highest == null) {
+            return ResponseEntity.noContent().build(); // Devuelve 204 sin cuerpo
+        }
+        return ResponseEntity.ok(highest);
     }
 
     @Operation(summary = "Obtiene pujas del usuario actual", description = "Devuelve todas las pujas realizadas por el usuario autenticado")

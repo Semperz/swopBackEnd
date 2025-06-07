@@ -6,14 +6,13 @@ import edu.badpals.swopbackend.model.ProductCategory;
 import edu.badpals.swopbackend.repository.ProductRepository;
 import edu.badpals.swopbackend.repository.CategoryRepository;
 import edu.badpals.swopbackend.repository.ProductCategoryRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -99,38 +98,62 @@ public class ProductService {
     @Transactional
     public ProductDto updateProduct(Long id, ProductDto productDto) {
         Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with ID: " + id));
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with ID: " + id));
 
-        // Actualiza campos básicos con modelMapper
-        modelMapper.map(productDto, existingProduct);
+        try {
+            // Actualiza los campos básicos manualmente (excepto categorías)
+            existingProduct.setName(productDto.getName());
+            existingProduct.setDescriptions(productDto.getDescriptions());
+            existingProduct.setPrice(productDto.getPrice());
+            existingProduct.setImage(productDto.getImage());
+            existingProduct.setCreateDate(productDto.getCreateDate());
+            existingProduct.setSku(productDto.getSku());
+            existingProduct.setWeight(productDto.getWeight());
+            existingProduct.setThumbnail(productDto.getThumbnail());
+            existingProduct.setStock(productDto.getStock());
+            existingProduct.setAuctionEndTime(productDto.getAuctionEndTime());
 
-        // Actualiza relaciones con categorías
-        List<ProductCategory> currentCategories = productCategoryRepository.findByProduct(existingProduct);
-        Set<Long> currentCategoryIds = currentCategories.stream()
-                .map(pc -> pc.getCategory().getId())
-                .collect(Collectors.toSet());
+            // Gestiona las categorías
+            // Elimina todas las relaciones antiguas
+            List<ProductCategory> oldCategories = new ArrayList<>(existingProduct.getCategories());
+            for (ProductCategory pc : oldCategories) {
+                pc.setProduct(null); // Rompe la relación
+            }
+            existingProduct.getCategories().clear();
 
-        Set<Long> newCategoryIds = new HashSet<>(productDto.getCategories());
+            // Añade las nuevas relaciones
+            List<ProductCategory> newProductCategories = new ArrayList<>();
+            for (Long categoryId : productDto.getCategories()) {
+                Category category = categoryRepository.findById(categoryId)
+                        .orElseThrow(() -> new EntityNotFoundException("Category not found: " + categoryId));
+                ProductCategory newPc = new ProductCategory(existingProduct, category);
+                newProductCategories.add(newPc);
+            }
+            existingProduct.getCategories().addAll(newProductCategories);
 
-        List<ProductCategory> categoriesToRemove = currentCategories.stream()
-                .filter(pc -> !newCategoryIds.contains(pc.getCategory().getId()))
-                .collect(Collectors.toList());
+            // Guarda el producto actualizado
+            Product updatedProduct = productRepository.save(existingProduct);
+            return toDto(updatedProduct);
+        } catch (Exception ex) {
+            throw new RuntimeException("Error updating product: " + ex.getMessage(), ex);
+        }
+    }
 
-        List<ProductCategory> categoriesToAdd = newCategoryIds.stream()
-                .filter(categoryId -> !currentCategoryIds.contains(categoryId))
-                .map(categoryId -> {
-                    Category category = categoryRepository.findById(categoryId)
-                            .orElseThrow(() -> new RuntimeException("Category not found: " + categoryId));
-                    return new ProductCategory(existingProduct, category);
-                })
-                .collect(Collectors.toList());
+    public ProductDto getAuctedProduct(){
+        List<Product> products = productRepository.findAll();
+        if (products.isEmpty()) {
+            throw new RuntimeException("No products available for auction.");
+        }
+        // Filtrar productos que tienen una fecha de finalización de subasta
+        List<Product> auctedProducts = products.stream()
+                .filter(product -> product.getAuctionEndTime() != null)
+                .toList();
 
-        productCategoryRepository.deleteAll(categoriesToRemove);
-        productCategoryRepository.saveAll(categoriesToAdd);
+        if (auctedProducts.isEmpty()) {
+            throw new RuntimeException("No products available for auction.");
+        }
 
-        existingProduct.setCategories(productCategoryRepository.findByProduct(existingProduct));
-        Product updatedProduct = productRepository.save(existingProduct);
-
-        return toDto(updatedProduct);
+        // Retornar el primer producto con subasta
+        return toDto(auctedProducts.get(0));
     }
 }
