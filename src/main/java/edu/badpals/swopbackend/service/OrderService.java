@@ -134,32 +134,30 @@ public class OrderService {
 
         // Obtener nuevos detalles
         Set<OrderDetailDto> details = orderDto.getOrderDetails();
-
         Set<Long> productIds = details.stream()
                 .map(OrderDetailDto::getProduct)
                 .collect(Collectors.toSet());
-
         Map<Long, Product> productMap = productRepository.findAllById(productIds).stream()
                 .collect(Collectors.toMap(Product::getId, p -> p));
 
-        // Crear y guardar nuevos detalles
-        details.stream().map(detailDto -> {
+        Set<OrderDetail> newOrderDetails = details.stream().map(detailDto -> {
             Product product = productMap.get(detailDto.getProduct());
             if (product == null) {
                 throw new RuntimeException("Product not found with ID: " + detailDto.getProduct());
             }
-
-            return new OrderDetail(
+            return orderDetailRepository.save(new OrderDetail(
                     existingOrder,
                     product,
                     detailDto.getPrice(),
                     detailDto.getSku(),
                     detailDto.getQuantity()
-            );
-        }).forEach(orderDetailRepository::save);
+            ));
+        }).collect(Collectors.toSet());
 
-        // Actualizar campos del pedido
-        existingOrder.setCustomer(orderDto.getCustomer());
+        // limpiar y añadir en la orderDetails de la orden existente
+        existingOrder.getOrderDetails().clear();
+        existingOrder.getOrderDetails().addAll(newOrderDetails);
+
         existingOrder.setAmount(orderDto.getAmount());
         existingOrder.setShippingAddress(orderDto.getShippingAddress());
         existingOrder.setOrderAddress(orderDto.getOrderAddress());
@@ -167,6 +165,8 @@ public class OrderService {
         existingOrder.setOrderStatus(orderDto.getOrderStatus());
         existingOrder.setPaymentMethod(orderDto.getPaymentMethod());
         existingOrder.setOrderDate(orderDto.getOrderDate());
+
+        orderRepository.save(existingOrder);
 
         return toDto(existingOrder);
     }

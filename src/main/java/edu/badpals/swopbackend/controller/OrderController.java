@@ -90,7 +90,9 @@ public class OrderController {
             OrderDto updatedOrder = orderService.updateOrder(id, orderDto);
             return ResponseEntity.ok(updatedOrder);
         } catch (RuntimeException e) {
+            e.printStackTrace();
             return ResponseEntity.notFound().build();
+
         }
     }
 
