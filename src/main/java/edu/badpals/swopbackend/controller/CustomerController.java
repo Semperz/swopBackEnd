@@ -42,7 +42,7 @@ public class CustomerController {
             @ApiResponse(responseCode = "200", description = "Cliente encontrado"),
             @ApiResponse(responseCode = "404", description = "Cliente no encontrado")
     })
-    @PreAuthorize("hasRole('ADMIN')") // Solo administradores o el propio cliente
+    @PreAuthorize("isAuthenticated()") // Solo administradores o el propio cliente
     public ResponseEntity<CustomerDto> getCustomerById(@PathVariable Long id) {
         try {
             CustomerDto customer = customerService.getCustomerById(id);
