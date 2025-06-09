@@ -20,11 +20,12 @@ public class OrderDto {
     private OrderStatus orderStatus;
     private PaymentMethod paymentMethod;
     private LocalDateTime orderDate;
+    private boolean fromAuction = false;
 
     public OrderDto() {
     }
 
-    public OrderDto(Long id, Customer customer, Set<OrderDetailDto> orderDetails,BigDecimal amount, String shippingAddress, String orderAddress, String orderEmail, OrderStatus orderStatus, PaymentMethod paymentMethod, LocalDateTime orderDate) {
+    public OrderDto(Long id, Customer customer, Set<OrderDetailDto> orderDetails,BigDecimal amount, String shippingAddress, String orderAddress, String orderEmail, OrderStatus orderStatus, PaymentMethod paymentMethod, LocalDateTime orderDate, boolean fromAuction) {
         this.id = id;
         this.customer = customer;
         this.orderDetails = orderDetails;
@@ -35,6 +36,7 @@ public class OrderDto {
         this.orderStatus = orderStatus;
         this.paymentMethod = paymentMethod;
         this.orderDate = orderDate;
+        this.fromAuction = fromAuction;
     }
 
     public Long getId() {
@@ -113,5 +115,13 @@ public class OrderDto {
 
     public void setOrderDate(LocalDateTime orderDate) {
         this.orderDate = orderDate;
+    }
+
+    public boolean isFromAuction() {
+        return fromAuction;
+    }
+
+    public void setFromAuction(boolean fromAuction) {
+        this.fromAuction = fromAuction;
     }
 }

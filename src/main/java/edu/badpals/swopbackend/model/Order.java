@@ -43,10 +43,13 @@ public class Order {
     @Column(nullable = false, updatable = false)
     private LocalDateTime orderDate = LocalDateTime.now();
 
+    @Column(nullable = false)
+    private boolean fromAuction = false;
+
     public Order() {
     }
 
-    public Order(Customer customer, Set<OrderDetail> orderDetails ,BigDecimal amount, String shippingAddress, String orderAddress, String orderEmail, OrderStatus orderStatus, PaymentMethod paymentMethod) {
+    public Order(Customer customer, Set<OrderDetail> orderDetails ,BigDecimal amount, String shippingAddress, String orderAddress, String orderEmail, OrderStatus orderStatus, PaymentMethod paymentMethod, boolean fromAuction) {
         this.customer = customer;
         this.orderDetails = orderDetails;
         this.amount = amount;
@@ -55,6 +58,7 @@ public class Order {
         this.orderEmail = orderEmail;
         this.orderStatus = orderStatus;
         this.paymentMethod = paymentMethod;
+        this.fromAuction = fromAuction;
     }
 
     public Long getId() {
@@ -136,5 +140,9 @@ public class Order {
     public void setOrderDate(LocalDateTime orderDate) {
         this.orderDate = orderDate;
     }
+
+    public boolean isFromAuction() {return fromAuction;}
+
+    public void setFromAuction(boolean fromAuction) {this.fromAuction = fromAuction;}
 }
 
