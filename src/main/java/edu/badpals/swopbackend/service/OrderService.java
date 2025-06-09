@@ -57,12 +57,7 @@ public class OrderService {
 
     private Order toEntity(OrderDto dto) {
         Order order = modelMapper.map(dto, Order.class);
-        if (dto.getOrderDetails() != null) {
-            Set<OrderDetail> details = dto.getOrderDetails().stream()
-                    .map(detailDto -> modelMapper.map(detailDto, OrderDetail.class))
-                    .collect(Collectors.toSet());
-            order.setOrderDetails(details);
-        }
+        order.setOrderDetails(null); // Evita que ModelMapper asocie detalles
         return order;
     }
 
@@ -75,10 +70,10 @@ public class OrderService {
         Order order = toEntity(orderDto);
         order.setCustomer(customer);
 
+        // Guarda la orden sin detalles
         Order savedOrder = orderRepository.save(order);
 
         Set<OrderDetailDto> details = orderDto.getOrderDetails();
-
         Set<Long> productIds = details.stream()
                 .map(OrderDetailDto::getProduct)
                 .collect(Collectors.toSet());
@@ -86,7 +81,8 @@ public class OrderService {
         Map<Long, Product> productMap = productRepository.findAllById(productIds).stream()
                 .collect(Collectors.toMap(Product::getId, p -> p));
 
-        details.stream().map(detailDto -> {
+        // Crea los detalles y asígnales la orden guardada
+        Set<OrderDetail> orderDetails = details.stream().map(detailDto -> {
             Product product = productMap.get(detailDto.getProduct());
             if (product == null) {
                 throw new RuntimeException("Product not found with ID: " + detailDto.getProduct());
@@ -98,7 +94,11 @@ public class OrderService {
                     detailDto.getSku(),
                     detailDto.getQuantity()
             );
-        }).forEach(orderDetailRepository::save);
+        }).collect(Collectors.toSet());
+
+        // Asocia los detalles a la orden y guarda la orden de nuevo
+        savedOrder.setOrderDetails(orderDetails);
+        orderRepository.save(savedOrder);
 
         return toDto(savedOrder);
     }

@@ -65,9 +65,18 @@ public class OrderController {
             @ApiResponse(responseCode = "400", description = "Datos inválidos")
     })
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<OrderDto> createOrder(@RequestBody OrderDto orderDto,  Authentication authentication) {
-        OrderDto newOrder = orderService.createOrder(orderDto, authentication.getName());
-        return ResponseEntity.status(HttpStatus.CREATED).body(newOrder);
+    public ResponseEntity<?> createOrder(@RequestBody OrderDto orderDto, Authentication authentication) {
+        try {
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Usuario no autenticado");
+            }
+            String email = authentication.getName();
+            OrderDto createdOrder = orderService.createOrder(orderDto, email);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al crear el pedido: " + e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")

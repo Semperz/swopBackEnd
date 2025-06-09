@@ -27,12 +27,13 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/img/**").permitAll()
                         .requestMatchers("/api/products/**", "/api/categories/**").permitAll()
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/customers").permitAll() // registro
                         .requestMatchers("/api/customers/me/**").hasRole("USER")
-                        .requestMatchers("/api/customers/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/orders/**").authenticated()
+
                         .anyRequest().authenticated()
                 ).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 // token stateless

@@ -71,12 +71,12 @@ public class InitDbService {
             categoryRepository.save(category3);
 
             // Productos
-            Product product1 = new Product("SW001", "Luke Skywalker Action Figure", new BigDecimal("19.99"), 0.5, "Figura de acción de Luke Skywalker", "thumbnail1.jpg", "image1.jpg", null, 100, null);
-            Product product2 = new Product("SW002", "Darth Vader Action Figure", new BigDecimal("24.99"), 0.6, "Figura de acción de Darth Vader", "thumbnail2.jpg", "image2.jpg", null, 100, null);
-            Product product3 = new Product("SW003", "Millennium Falcon LEGO Set", new BigDecimal("149.99"), 2.5, "Set de LEGO del Millennium Falcon", "thumbnail3.jpg", "image3.jpg", null, 50, null);
-            Product product4 = new Product("SW004", "Yoda Collectible Figure", new BigDecimal("29.99"), 0.3, "Figura coleccionable de Yoda", "thumbnail4.jpg", "image4.jpg", null, 1, null);
-            Product product5 = new Product("SW005", "Stormtrooper Action Figure", new BigDecimal("14.99"), 0.4, "Figura de acción de Stormtrooper", "thumbnail5.jpg", "image5.jpg", null, 120, LocalDateTime.now().plusDays(1));
-            Product product6 = new Product("SW006", "R2-D2 LEGO Set", new BigDecimal("79.99"), 1.0, "Set de LEGO de R2-D2", "thumbnail6.jpg", "image6.jpg", null, 4, null);
+            Product product1 = new Product("SW001", "Luke Skywalker Action Figure", new BigDecimal("19.99"), 0.5, "Figura de acción de Luke Skywalker", "lukeactionfigure.jfif", "lukeactionfigure.jfif", null, 100, null);
+            Product product2 = new Product("SW002", "Darth Vader Action Figure", new BigDecimal("24.99"), 0.6, "Figura de acción de Darth Vader", "darthvaderfigure.jfif", "darthvaderfigure.jfif", null, 100, null);
+            Product product3 = new Product("SW003", "Millennium Falcon LEGO Set", new BigDecimal("149.99"), 2.5, "Set de LEGO del Millennium Falcon", "milleniumfalconlego.jfif", "milleniumfalconlego.jfif", null, 50, null);
+            Product product4 = new Product("SW004", "Yoda Collectible Figure", new BigDecimal("29.99"), 0.3, "Figura coleccionable de Yoda", "yodafigure.jfif", "yodafigure.jfif", null, 1, null);
+            Product product5 = new Product("SW005", "Stormtrooper Action Figure", new BigDecimal("14.99"), 0.4, "Figura de acción de Stormtrooper", "stormtrooperfigure.jfif", "stormtrooperfigure.jfif", null, 120, LocalDateTime.now().plusMinutes(1));
+            Product product6 = new Product("SW006", "R2-D2 LEGO Set", new BigDecimal("79.99"), 1.0, "Set de LEGO de R2-D2", "r2d2lego.jfif", "r2d2lego.jfif", null, 4, null);
             productRepository.save(product1);
             productRepository.save(product2);
             productRepository.save(product3);
