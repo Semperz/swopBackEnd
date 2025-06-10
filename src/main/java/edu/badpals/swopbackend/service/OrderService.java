@@ -165,6 +165,7 @@ public class OrderService {
         existingOrder.setOrderStatus(orderDto.getOrderStatus());
         existingOrder.setPaymentMethod(orderDto.getPaymentMethod());
         existingOrder.setOrderDate(orderDto.getOrderDate());
+        existingOrder.setFromAuction(orderDto.isFromAuction());
 
         orderRepository.save(existingOrder);
 
