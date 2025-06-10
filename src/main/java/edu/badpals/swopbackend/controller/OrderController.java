@@ -108,4 +108,19 @@ public class OrderController {
         orderService.deleteOrder(id, email);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/details/productsname/{orderDetailId}")
+    @Operation(summary = "Obtener nombre de producto en un detalle de pedido", description = "Recibe un detalle de pedido basado en su ID y devuelve el nombre del producto.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Nombre del producto obtenido exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Detalle de pedido no encontrado")
+    })
+    public ResponseEntity<String> getProductNameByOrderDetailId(@PathVariable Long orderDetailId) {
+        try {
+            String productName = orderService.getProductNameByOrderDetailId(orderDetailId);
+            return ResponseEntity.ok(productName);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

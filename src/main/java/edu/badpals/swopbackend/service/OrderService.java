@@ -184,4 +184,12 @@ public class OrderService {
 
         orderRepository.deleteById(orderId);
     }
+
+
+    public String getProductNameByOrderDetailId(Long orderDetailId) {
+        OrderDetail od = orderDetailRepository.findById(orderDetailId)
+                .orElseThrow(() -> new RuntimeException("OrderDetail not found with ID: " + orderDetailId));
+
+        return od.getProduct().getName();
+    }
 }

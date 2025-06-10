@@ -20,22 +20,19 @@ public class InitDbService {
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final BidRepository bidRepository;
 
     public InitDbService(CustomerRepository customerRepository,
                          ProductCategoryRepository productCategoryRepository,
                          ProductRepository productRepository,
                          CategoryRepository categoryRepository,
                          OrderRepository orderRepository,
-                         OrderDetailRepository orderDetailRepository,
-                         BidRepository bidRepository) {
+                         OrderDetailRepository orderDetailRepository) {
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.productCategoryRepository = productCategoryRepository;
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.customerRepository = customerRepository;
-        this.bidRepository = bidRepository;
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
