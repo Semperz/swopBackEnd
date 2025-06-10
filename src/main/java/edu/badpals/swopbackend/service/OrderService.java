@@ -186,10 +186,9 @@ public class OrderService {
     }
 
 
-    public String getProductNameByOrderDetailId(Long orderDetailId) {
-        OrderDetail od = orderDetailRepository.findById(orderDetailId)
+    public List<String> getProductNameByOrderDetailId(Long orderDetailId) {
+        OrderDetail detail = orderDetailRepository.findById(orderDetailId)
                 .orElseThrow(() -> new RuntimeException("OrderDetail not found with ID: " + orderDetailId));
-
-        return od.getProduct().getName();
+        return List.of(detail.getProduct().getName());
     }
 }

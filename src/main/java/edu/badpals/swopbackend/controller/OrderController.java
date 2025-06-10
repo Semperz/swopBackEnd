@@ -102,7 +102,7 @@ public class OrderController {
             @ApiResponse(responseCode = "204", description = "Pedido eliminado exitosamente"),
             @ApiResponse(responseCode = "404", description = "Pedido no encontrado")
     })
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteOrder(@PathVariable("id") Long id, Authentication authentication) {
         String email = authentication.getName();
         orderService.deleteOrder(id, email);
@@ -115,10 +115,11 @@ public class OrderController {
             @ApiResponse(responseCode = "200", description = "Nombre del producto obtenido exitosamente"),
             @ApiResponse(responseCode = "404", description = "Detalle de pedido no encontrado")
     })
-    public ResponseEntity<String> getProductNameByOrderDetailId(@PathVariable Long orderDetailId) {
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<String>> getProductNameByOrderDetailId(@PathVariable Long orderDetailId) {
         try {
-            String productName = orderService.getProductNameByOrderDetailId(orderDetailId);
-            return ResponseEntity.ok(productName);
+            List<String> productNames = orderService.getProductNameByOrderDetailId(orderDetailId);
+            return ResponseEntity.ok(productNames);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
